@@ -1,0 +1,36 @@
+service: player-api
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs8.10
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:UpdateItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/Players"
+
+functions:
+  query:
+    handler: index.query
+    events:
+      - http:
+          path: query
+          method: get
+
+resources:
+  Resources:
+    PlayersTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: 'Players'
